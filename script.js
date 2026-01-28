@@ -10,43 +10,52 @@ const filtersMobile = document.getElementById('filtersMobile');
 const todoFooter = document.getElementById('todoFooter');
 
 // State
-let todos = [];
+let todos = JSON.parse(localStorage.getItem('todos')) || [];
 let currentFilter = 'all';
-let isDarkTheme = false;
+let isDarkTheme = localStorage.getItem('isDarkTheme') === 'true';
 
 // Initialize
 function init() {
-    // Load todos from localStorage
-    const savedTodos = localStorage.getItem('todos');
-    todos = savedTodos ? JSON.parse(savedTodos) : [];
-    
-    // Load theme preference
-    const savedTheme = localStorage.getItem('isDarkTheme');
-    isDarkTheme = savedTheme === 'true';
-    
-    // Set initial theme
-    setTheme(isDarkTheme);
+    // Set theme
+    if (isDarkTheme) {
+        document.body.classList.add('dark-theme');
+        themeToggle.querySelector('img').src = './images/icon-sun.svg';
+    }
     
     // Add sample todos if empty
     if (todos.length === 0) {
-        addSampleTodos();
+        todos = [
+            { id: 1, text: 'Complete online JavaScript course', completed: true },
+            { id: 2, text: 'Jog around the park 3x', completed: false },
+            { id: 3, text: '10 minutes meditation', completed: false },
+            { id: 4, text: 'Read for 1 hour', completed: false },
+            { id: 5, text: 'Pick up groceries', completed: false },
+            { id: 6, text: 'Complete Todo App on Frontend Mentor', completed: false }
+        ];
+        saveTodos();
     }
     
-    // Render initial todos
     renderTodos();
     updateItemsLeft();
 }
 
-// Theme Functions
-function setTheme(isDark) {
-    if (isDark) {
+// Theme Toggle
+themeToggle.addEventListener('click', () => {
+    isDarkTheme = !isDarkTheme;
+    localStorage.setItem('isDarkTheme', isDarkTheme);
+    
+    const themeIcon = themeToggle.querySelector('img');
+    
+    if (isDarkTheme) {
         document.body.classList.add('dark-theme');
-        themeToggle.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'26\' height=\'26\'%3E%3Cpath fill=\'%23FFF\' d=\'M13 21a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-5.657-2.343a1 1 0 010 1.414l-2.121 2.121a1 1 0 01-1.414-1.414l2.12-2.121a1 1 0 011.415 0zm12.728 0l2.121 2.121a1 1 0 01-1.414 1.414l-2.121-2.12a1 1 0 011.414-1.415zM13 8a5 5 0 110 10 5 5 0 010-10zm12 4a1 1 0 110 2h-3a1 1 0 110-2h3zM4 12a1 1 0 110 2H1a1 1 0 110-2h3zm18.192-8.192a1 1 0 010 1.414l-2.12 2.121a1 1 0 01-1.415-1.414l2.121-2.121a1 1 0 011.414 0zm-16.97 0l2.121 2.121a1 1 0 01-1.414 1.414L2.808 5.222a1 1 0 011.414-1.414zM13 0a1 1 0 011 1v3a1 1 0 11-2 0V1a1 1 0 011-1z\'/%3E%3C/svg%3E" alt="Sun icon" class="theme-icon">';
+        themeIcon.src = './images/icon-sun.svg';
+        themeIcon.alt = 'Switch to light theme';
     } else {
         document.body.classList.remove('dark-theme');
-        themeToggle.innerHTML = '<img src="data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'26\' height=\'26\'%3E%3Cpath fill=\'%23FFF\' d=\'M13 0c.81 0 1.603.074 2.373.216C10.593 1.199 7 5.43 7 10.5 7 16.299 11.701 21 17.5 21c2.996 0 5.7-1.255 7.613-3.268C23.22 22.572 18.51 26 13 26 5.82 26 0 20.18 0 13S5.82 0 13 0z\'/%3E%3C/svg%3E" alt="Moon icon" class="theme-icon">';
+        themeIcon.src = './images/icon-moon.svg';
+        themeIcon.alt = 'Switch to dark theme';
     }
-}
+});
 
 // Todo Functions
 function addTodo() {
@@ -56,8 +65,7 @@ function addTodo() {
     const newTodo = {
         id: Date.now(),
         text: text,
-        completed: false,
-        createdAt: new Date().toISOString()
+        completed: false
     };
     
     todos.push(newTodo);
@@ -154,53 +162,42 @@ function renderTodos() {
     
     // Create todo items
     filteredTodos.forEach(todo => {
-        const todoElement = createTodoElement(todo);
+        const todoElement = document.createElement('div');
+        todoElement.className = `todo-item ${todo.completed ? 'completed' : ''}`;
+        todoElement.setAttribute('data-id', todo.id);
+        todoElement.setAttribute('draggable', 'true');
+        
+        todoElement.innerHTML = `
+            <div class="check-circle">
+                <div class="circle ${todo.completed ? 'completed' : ''}"></div>
+            </div>
+            <div class="todo-text">${todo.text}</div>
+            <button class="delete-btn">
+                <img src="./images/icon-cross.svg" alt="Delete todo">
+            </button>
+        `;
+        
+        // Add event listeners
+        const circle = todoElement.querySelector('.circle');
+        const deleteBtn = todoElement.querySelector('.delete-btn');
+        const todoText = todoElement.querySelector('.todo-text');
+        
+        circle.addEventListener('click', () => toggleTodo(todo.id));
+        deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
+        todoText.addEventListener('click', () => toggleTodo(todo.id));
+        
+        // Drag and drop
+        todoElement.addEventListener('dragstart', handleDragStart);
+        todoElement.addEventListener('dragover', handleDragOver);
+        todoElement.addEventListener('drop', handleDrop);
+        todoElement.addEventListener('dragend', handleDragEnd);
+        
         todoList.appendChild(todoElement);
     });
-    
-    // Initialize drag and drop
-    initDragAndDrop();
-}
-
-function createTodoElement(todo) {
-    const todoElement = document.createElement('div');
-    todoElement.className = `todo-item ${todo.completed ? 'completed' : ''}`;
-    todoElement.setAttribute('data-id', todo.id);
-    todoElement.setAttribute('draggable', 'true');
-    
-    todoElement.innerHTML = `
-        <div class="check-circle">
-            <div class="circle ${todo.completed ? 'completed' : ''}"></div>
-        </div>
-        <div class="todo-text">${todo.text}</div>
-        <button class="delete-btn" aria-label="Delete todo">✕</button>
-    `;
-    
-    // Add event listeners
-    const circle = todoElement.querySelector('.circle');
-    const deleteBtn = todoElement.querySelector('.delete-btn');
-    const todoText = todoElement.querySelector('.todo-text');
-    
-    circle.addEventListener('click', () => toggleTodo(todo.id));
-    deleteBtn.addEventListener('click', () => deleteTodo(todo.id));
-    todoText.addEventListener('click', () => toggleTodo(todo.id));
-    
-    return todoElement;
 }
 
 // Drag and Drop
 let draggedItem = null;
-
-function initDragAndDrop() {
-    const todoItems = document.querySelectorAll('.todo-item');
-    
-    todoItems.forEach(item => {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('drop', handleDrop);
-        item.addEventListener('dragend', handleDragEnd);
-    });
-}
 
 function handleDragStart(e) {
     draggedItem = this;
@@ -249,25 +246,7 @@ function saveTodos() {
     localStorage.setItem('todos', JSON.stringify(todos));
 }
 
-function addSampleTodos() {
-    todos = [
-        { id: 1, text: 'Complete online JavaScript course', completed: true },
-        { id: 2, text: 'Jog around the park 3x', completed: false },
-        { id: 3, text: '10 minutes meditation', completed: false },
-        { id: 4, text: 'Read for 1 hour', completed: false },
-        { id: 5, text: 'Pick up groceries', completed: false },
-        { id: 6, text: 'Complete Todo App on Frontend Mentor', completed: false }
-    ];
-    saveTodos();
-}
-
 // Event Listeners
-themeToggle.addEventListener('click', () => {
-    isDarkTheme = !isDarkTheme;
-    localStorage.setItem('isDarkTheme', isDarkTheme);
-    setTheme(isDarkTheme);
-});
-
 todoInput.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
         addTodo();
@@ -278,7 +257,6 @@ addTodoCircle.addEventListener('click', addTodo);
 
 clearCompletedBtn.addEventListener('click', clearCompleted);
 
-// Filter event listeners
 document.querySelectorAll('.filter-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
         filterTodos(e.target.dataset.filter);

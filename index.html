@@ -11,19 +11,16 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header Section -->
         <header class="header">
             <div class="header-content">
                 <h1>TODO</h1>
-                <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-                    <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Cpath fill='%23FFF' d='M13 21a1 1 0 011 1v3a1 1 0 11-2 0v-3a1 1 0 011-1zm-5.657-2.343a1 1 0 010 1.414l-2.121 2.121a1 1 0 01-1.414-1.414l2.12-2.121a1 1 0 011.415 0zm12.728 0l2.121 2.121a1 1 0 01-1.414 1.414l-2.121-2.12a1 1 0 011.414-1.415zM13 8a5 5 0 110 10 5 5 0 010-10zm12 4a1 1 0 110 2h-3a1 1 0 110-2h3zM4 12a1 1 0 110 2H1a1 1 0 110-2h3zm18.192-8.192a1 1 0 010 1.414l-2.12 2.121a1 1 0 01-1.415-1.414l2.121-2.121a1 1 0 011.414 0zm-16.97 0l2.121 2.121a1 1 0 01-1.414 1.414L2.808 5.222a1 1 0 011.414-1.414zM13 0a1 1 0 011 1v3a1 1 0 11-2 0V1a1 1 0 011-1z'/%3E%3C/svg%3E" alt="Sun icon" class="theme-icon">
+                <button class="theme-toggle" id="themeToggle">
+                    <img src="./images/icon-moon.svg" alt="Toggle theme" class="theme-icon">
                 </button>
             </div>
         </header>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <!-- Todo Input -->
             <div class="todo-input-container">
                 <div class="input-wrapper">
                     <div class="check-circle" id="addTodoCircle">
@@ -34,18 +31,15 @@
                         class="todo-input" 
                         id="todoInput" 
                         placeholder="Create a new todo..."
-                        aria-label="Create a new todo"
                     >
                 </div>
             </div>
 
-            <!-- Todo List -->
             <div class="todo-list-container">
                 <div class="todo-list" id="todoList">
-                    <!-- Todos will be added here dynamically -->
+                    <!-- Todos will appear here -->
                 </div>
 
-                <!-- Todo Footer -->
                 <div class="todo-footer" id="todoFooter">
                     <div class="items-left" id="itemsLeft">5 items left</div>
                     <div class="filters" id="filters">
@@ -57,12 +51,10 @@
                 </div>
             </div>
 
-            <!-- Drag Info -->
             <div class="drag-info">
                 Drag and drop to reorder list
             </div>
 
-            <!-- Mobile Filters -->
             <div class="filters-mobile" id="filtersMobile">
                 <button class="filter-btn active" data-filter="all">All</button>
                 <button class="filter-btn" data-filter="active">Active</button>
